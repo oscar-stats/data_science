@@ -3,7 +3,6 @@ load('datos.RData')
 datos <- dengue_rio_clima
 rm(dengue_rio_clima)
 #======================================================================================================
-if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 # Exploratory data analysis
 # Summary of data set
 head(datos)
@@ -83,6 +82,7 @@ prop.table(table(datos$infection)) %>% round(digits = 2)
 #======================================================================================================
 #Here we observe the relationships of the variables to each other.
 if(!require(car)) install.packages("car", repos = "http://cran.us.r-project.org")
+library(car)
 scatterplotMatrix(~RiopyAsu + Precipitacion  + Temp_Aire_med + Presion_Atm_med+
                     Insolacion+Evaporacion, 
                   data = datos,  reg.line=lm, smooth=FALSE,
@@ -229,7 +229,7 @@ rm(datos_rf, modelo_randforest, importancia, p1, p2, datos)
 particiones  <- 10
 repeticiones <- 5
 
-# Hyperparameters
+# Hiperparámetros
 hiperparametros <- data.frame(k = c(1, 2, 5, 10, 15, 20, 30, 50))
 
 set.seed(123)
@@ -365,7 +365,7 @@ modelo_rf <- train(infection ~ ., data = datos_train_prep,
                    tuneGrid = hiperparametros,
                    metric = "Accuracy",
                    trControl = control_train,
-                   # Number of adjusted trees
+                   # Número de árboles ajustados
                    num.trees = 500)
 modelo_rf
 
@@ -450,12 +450,12 @@ modelo_nnet <- train(infection ~ ., data = datos_train_prep,
                      tuneGrid = hiperparametros,
                      metric = "Accuracy",
                      trControl = control_train,
-                     # Initialization range of weights
+                     # Rango de inicialización de los pesos
                      rang = c(-0.7, 0.7),
-                     # Maximum number of weights
-                     # is increased to include more meurons
+                     # Número máximo de pesos
+                     # se aumenta para poder incluir más meuronas
                      MaxNWts = 2000,
-                     # So that each iteration is not shown on the screen
+                     # Para que no se muestre cada iteración por pantalla
                      trace = FALSE)
 modelo_nnet
 
@@ -476,7 +476,7 @@ modelos <- list(KNN = modelo_knn, logistic = modelo_logistic,
 resultados_resamples <- resamples(modelos)
 resultados_resamples$values %>% head(10)
 #======================================================================================================
-if(!require(tidyr)) install.packages("tidyr", repos = "http://cran.us.r-project.org")
+
 # The data frame returned by resamples () is transformed to separate the name of the
 # model and metrics in different columns.
 metricas_resamples <- resultados_resamples$values %>%
@@ -509,8 +509,8 @@ metricas_resamples %>%
   # Accuracy basal
   geom_hline(yintercept = 0.43, linetype = "dashed") +
   annotate(geom = "text", y = 0.48, x =6.5, label = "") +
-  labs(title = "Validation: Accuracy medio repeated-CV",
-       subtitle = "Models ordered by mean",
+  labs(title = "Validación: Accuracy medio repeated-CV",
+       subtitle = "Modelos ordenados por media",
        x = "modelo") +
   coord_flip() +
   theme_bw()
@@ -549,12 +549,11 @@ ggplot(data = metricas_predicciones,
   geom_hline(yintercept = 0.43, linetype = "dashed") +
   annotate(geom = "text", y = 0.48, x = 6.5, label = "Accuracy basal") +
   coord_flip() +
-  labs(title = "Accuracy training and test", 
+  labs(title = "Accuracy de entrenamiento y test", 
        x = "modelo") +
   theme_bw() + 
   theme(legend.position = "bottom")
 #======================================================================================================
-#conclusion
 #The Random Forest model is the one that obtains the best results taking into account the accuracy 
 #metric both in the test set and in the validation (repeated CV). The remaining models achieve very similar 
 #test values.
